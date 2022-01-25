@@ -73,9 +73,9 @@ export default function PaginaInicial() {
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
-						backgroundColor: appConfig.theme.colors.primary[500],
+						backgroundColor: appConfig.theme.colors.neutrals[800],
 						backgroundImage:
-							'url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)',
+							'url(https://virtualbackgrounds.site/wp-content/uploads/2020/07/earthrise-1536x864.jpg)',
 						backgroundRepeat: 'no-repeat',
 						backgroundSize: 'cover',
 						backgroundBlendMode: 'multiply',
@@ -98,6 +98,8 @@ export default function PaginaInicial() {
 						margin: '16px',
 						boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
 						backgroundColor: appConfig.theme.colors.neutrals[700],
+						border: '1px solid',
+						borderColor: appConfig.theme.colors.neutrals[999],
 					}}
 				>
 					{/* Formulário */}
@@ -134,8 +136,6 @@ export default function PaginaInicial() {
 										mainColorHighlight: appConfig.theme.colors.primary[500],
 										backgroundColor: appConfig.theme.colors.neutrals[800],
 									},
-									// positive: null,
-									// negative: null
 								} as any
 							}
 							name=''
