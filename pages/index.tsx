@@ -107,6 +107,7 @@ export default function PaginaInicial() {
 					{/* Formulário */}
 					<Box
 						tag='form'
+						// @ts-ignore: Unreachable code error
 						onSubmit={(event) => {
 							event.preventDefault()
 							router.push('/chat')
@@ -214,7 +215,9 @@ export default function PaginaInicial() {
 											borderColor: appConfig.theme.colors.neutrals[400],
 										} as any
 									}
-								/>
+								>
+									{' '}
+								</Box>
 								<Text
 									variant='body4'
 									styleSheet={{
