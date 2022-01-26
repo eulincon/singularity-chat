@@ -1,36 +1,7 @@
-import { Box, Button, Image, Text, TextField } from '@skynexui/components'
+import { Box, Button, Icon, Image, Text, TextField } from '@skynexui/components'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import appConfig from '../config.json'
-
-function GlobalStyle() {
-	return (
-		<style global jsx>{`
-			* {
-				margin: 0;
-				padding: 0;
-				box-sizing: border-box;
-				list-style: none;
-			}
-			body {
-				font-family: 'Open Sans', sans-serif;
-			}
-			/* App fit Height */
-			html,
-			body,
-			#__next {
-				min-height: 100vh;
-				display: flex;
-				flex: 1;
-			}
-			#__next {
-				flex: 1;
-			}
-			#__next > * {
-				flex: 1;
-			}
-			/* ./App fit Height */
-		`}</style>
-	)
-}
 
 function Titulo(props) {
 	const Tag = props.tag || 'h1'
@@ -62,11 +33,42 @@ function Titulo(props) {
 // export default HomePage
 
 export default function PaginaInicial() {
-	const username = 'zlincon'
+	const [username, setUsername] = useState('zlincon')
+	const [followers, setFollowers] = useState('')
+	const [following, setFollowing] = useState('')
+	const [githubApi, setGithubApi] = useState<GithubApi>({
+		name: null,
+		followers_url: null,
+		following_url: null,
+	})
+	const router = useRouter()
+
+	useEffect(() => {
+		fetch(`https://api.github.com/users/${username}`)
+			.then((res) => {
+				return res.json()
+			})
+			.then((res) => {
+				setGithubApi(res)
+			})
+		githubApi.followers_url &&
+			fetch(`${githubApi.followers_url}`)
+				.then((res) => res.json())
+				.then((res) => {
+					console.log(res)
+					setFollowers(res.length)
+				})
+		githubApi.following_url &&
+			fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
+				.then((res) => res.json())
+				.then((res) => {
+					console.log(res)
+					setFollowing(res.length)
+				})
+	}, [username])
 
 	return (
 		<>
-			<GlobalStyle />
 			<Box
 				styleSheet={
 					{
@@ -104,7 +106,11 @@ export default function PaginaInicial() {
 				>
 					{/* Formulário */}
 					<Box
-						as='form'
+						tag='form'
+						onSubmit={(event) => {
+							event.preventDefault()
+							router.push('/chat')
+						}}
 						styleSheet={{
 							display: 'flex',
 							flexDirection: 'column',
@@ -128,6 +134,10 @@ export default function PaginaInicial() {
 
 						<TextField
 							fullWidth
+							value={username}
+							onChange={(event) => {
+								setUsername(event.target.value)
+							}}
 							textFieldColors={
 								{
 									neutral: {
@@ -143,6 +153,7 @@ export default function PaginaInicial() {
 						<Button
 							type='submit'
 							label='Entrar'
+							disabled={username.length < 3}
 							fullWidth
 							buttonColors={{
 								contrastColor: appConfig.theme.colors.neutrals['000'],
@@ -179,7 +190,7 @@ export default function PaginaInicial() {
 							}}
 							src={`https://github.com/${username}.png`}
 						/>
-						<Text
+						{/* <Text
 							variant='body4'
 							styleSheet={{
 								color: appConfig.theme.colors.neutrals[200],
@@ -189,11 +200,56 @@ export default function PaginaInicial() {
 							}}
 						>
 							{username}
-						</Text>
+						</Text> */}
+
+						{githubApi.name && (
+							<>
+								<Box
+									styleSheet={
+										{
+											backgroundColor: appConfig.theme.colors.neutrals[800],
+											border: '1px solid',
+											margin: '1rem',
+											width: '100%',
+											borderColor: appConfig.theme.colors.neutrals[400],
+										} as any
+									}
+								/>
+								<Text
+									variant='body4'
+									styleSheet={{
+										color: appConfig.theme.colors.neutrals[200],
+										backgroundColor: appConfig.theme.colors.neutrals[900],
+										padding: '3px 10px',
+										borderRadius: '1000px',
+										marginBottom: '0.5rem',
+									}}
+								>
+									{githubApi.name}
+								</Text>
+								<Icon name='FaUserFriends' styleSheet={{ color: 'white' }} />
+								<Text
+									variant='body4'
+									styleSheet={{
+										color: appConfig.theme.colors.neutrals[200],
+									}}
+								>
+									{following}
+									{following?.length == 30 && '+'} followings | {followers}
+									{followers?.length == 30 && '+'} followers
+								</Text>
+							</>
+						)}
 					</Box>
 					{/* Photo Area */}
 				</Box>
 			</Box>
 		</>
 	)
+}
+
+type GithubApi = {
+	name: string
+	followers_url: string
+	following_url: string
 }
