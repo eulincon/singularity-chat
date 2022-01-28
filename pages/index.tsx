@@ -171,7 +171,7 @@ export default function PaginaInicial() {
 								display: 'flex',
 								flexDirection: 'column',
 								alignItems: 'center',
-								maxWidth: '200px',
+								maxWidth: '220px',
 								padding: '16px',
 								backgroundColor: appConfig.theme.colors.neutrals[800],
 								border: '1px solid',
@@ -242,7 +242,6 @@ export default function PaginaInicial() {
 							</>
 						)}
 					</Box>
-					{/* Photo Area */}
 				</Box>
 			</Box>
 		</>
