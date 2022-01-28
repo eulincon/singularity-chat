@@ -1,7 +1,6 @@
 import { Box, Button, Image, Text, TextField } from '@skynexui/components'
 import { createClient } from '@supabase/supabase-js'
 import React, { useEffect, useState } from 'react'
-import 'react-dropdown/style.css'
 import 'react-loading-skeleton/dist/skeleton.css'
 import ModalRemoveMessage from '../components/ModalRemoveMessage'
 import Skel from '../components/Skel'
