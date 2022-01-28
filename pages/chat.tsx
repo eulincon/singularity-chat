@@ -1,32 +1,69 @@
 import { Box, Button, Image, Text, TextField } from '@skynexui/components'
-import React, { useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import React, { useEffect, useState } from 'react'
 import 'react-dropdown/style.css'
+import 'react-loading-skeleton/dist/skeleton.css'
 import ModalRemoveMessage from '../components/ModalRemoveMessage'
+import Skel from '../components/Skel'
 import appConfig from '../config.json'
 
 type messageType = {
-	text: string
-	id: number
-	from: string
+	id?: number
+	texto: string
+	de: string
 }
+
+const SUPABASE_ANON_KEY =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyOTkzNiwiZXhwIjoxOTU4OTA1OTM2fQ.x6JHwySYKNuBab4BjYaOPdc44djRLQEDlIW-w0yXy4A'
+const SUPABASE_ANON_URL = 'https://bwolqsfbgqytdjdgdufi.supabase.co'
+const supabaseClient = createClient(SUPABASE_ANON_URL, SUPABASE_ANON_KEY)
 
 export default function ChatPage() {
 	const [message, setMessage] = useState('')
-	const [messageList, setMessageList] = useState<messageType[]>([])
+	const [messageList, setMessageList] = useState<messageType[]>()
+	const [loading, setLoading] = useState(false)
+
+	useEffect(() => {
+		supabaseClient
+			.from('messages')
+			.select('*')
+			.order('created_at', { ascending: false })
+			.then(({ data }) => {
+				setMessageList(data)
+				setLoading(false)
+			})
+	}, [])
 
 	const handleNewMessage = (newMessage: string) => {
+		setLoading(true)
 		const message = {
-			id: messageList.length + 1,
-			from: 'zlincon',
-			text: newMessage,
+			de: 'zlincon',
+			texto: newMessage,
 		}
-		setMessageList([message, ...messageList])
+
+		supabaseClient
+			.from('messages')
+			.insert([message])
+			.then(({ data }) => {
+				setMessageList([data[0], ...messageList])
+				setLoading(false)
+			})
 		setMessage('')
 	}
 
 	const removeMessage = (id: number) => {
-		const newMessageList = messageList.filter((message) => message.id != id)
-		setMessageList([...newMessageList])
+		supabaseClient
+			.from('messages')
+			.delete()
+			.match({ id: id })
+			.then(({ status }) => {
+				if (status == 200) {
+					const newMessageList = messageList.filter(
+						(message) => message.id != id
+					)
+					setMessageList([...newMessageList])
+				}
+			})
 	}
 
 	return (
@@ -74,7 +111,11 @@ export default function ChatPage() {
 						padding: '16px',
 					}}
 				>
-					<MessageList messages={messageList} removeMessage={removeMessage} />
+					<MessageList
+						messages={messageList}
+						removeMessage={removeMessage}
+						loading={loading}
+					/>
 
 					<Box
 						as='form'
@@ -161,10 +202,14 @@ function Header() {
 type MessageListProps = {
 	messages: messageType[]
 	removeMessage: (id: number) => void
+	loading: boolean
 }
 
-function MessageList({ messages, removeMessage }: MessageListProps) {
-	console.log(messages)
+function MessageList({ messages, removeMessage, loading }: MessageListProps) {
+	useEffect(() => {
+		console.log(loading)
+	}, [loading])
+
 	return (
 		<Box
 			tag='ul'
@@ -177,6 +222,16 @@ function MessageList({ messages, removeMessage }: MessageListProps) {
 				marginBottom: '16px',
 			}}
 		>
+			{!messages && (
+				<>
+					<Skel />
+					<Skel />
+					<Skel />
+					<Skel />
+				</>
+			)}
+
+			{loading && <Skel />}
 			{messages?.map((message) => {
 				return (
 					<Text
@@ -206,9 +261,10 @@ function MessageList({ messages, removeMessage }: MessageListProps) {
 									display: 'inline-block',
 									marginRight: '8px',
 								}}
-								src={`https://github.com/zlincon.png`}
+								src={`https://github.com/${message.de}.png`}
 							/>
-							<Text tag='strong'>{message?.from}</Text>
+
+							<Text tag='strong'>{message.de}</Text>
 							<Text
 								styleSheet={{
 									fontSize: '10px',
@@ -233,7 +289,7 @@ function MessageList({ messages, removeMessage }: MessageListProps) {
 								/>
 							</Box>
 						</Box>
-						{message?.text}
+						{message?.texto}
 					</Text>
 				)
 			})}

@@ -45,26 +45,24 @@ export default function PaginaInicial() {
 
 	useEffect(() => {
 		fetch(`https://api.github.com/users/${username}`)
-			.then((res) => {
-				return res.json()
-			})
+			.then(async (res) => await res.json())
 			.then((res) => {
 				setGithubApi(res)
 			})
-		githubApi.followers_url &&
-			fetch(`${githubApi.followers_url}`)
-				.then((res) => res.json())
-				.then((res) => {
-					console.log(res)
-					setFollowers(res.length)
-				})
-		githubApi.following_url &&
-			fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
-				.then((res) => res.json())
-				.then((res) => {
-					console.log(res)
-					setFollowing(res.length)
-				})
+			.then(() => {
+				githubApi.followers_url &&
+					fetch(`${githubApi.followers_url}`)
+						.then(async (res) => await res.json())
+						.then((res) => {
+							setFollowers(res.length)
+						})
+				githubApi.following_url &&
+					fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
+						.then(async (res) => await res.json())
+						.then((res) => {
+							setFollowing(res.length)
+						})
+			})
 	}, [username])
 
 	return (
@@ -238,8 +236,8 @@ export default function PaginaInicial() {
 									}}
 								>
 									{following}
-									{following?.length == 30 && '+'} followings | {followers}
-									{followers?.length == 30 && '+'} followers
+									{following == '30' && '+'} followings | {followers}
+									{followers == '30' && '+'} followers
 								</Text>
 							</>
 						)}
