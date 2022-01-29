@@ -33,7 +33,7 @@ function Titulo(props) {
 // export default HomePage
 
 export default function PaginaInicial() {
-	const [username, setUsername] = useState('zlincon')
+	const [username, setUsername] = useState('')
 	const [followers, setFollowers] = useState('')
 	const [following, setFollowing] = useState('')
 	const [githubApi, setGithubApi] = useState<GithubApi>({
@@ -108,7 +108,7 @@ export default function PaginaInicial() {
 						// @ts-ignore: Unreachable code error
 						onSubmit={(event) => {
 							event.preventDefault()
-							router.push('/chat')
+							router.push(`/chat?username=${username}`)
 						}}
 						styleSheet={{
 							display: 'flex',

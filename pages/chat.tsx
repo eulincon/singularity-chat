@@ -1,10 +1,12 @@
 import { Box, Button, Image, Text, TextField } from '@skynexui/components'
 import { createClient } from '@supabase/supabase-js'
+import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import 'react-loading-skeleton/dist/skeleton.css'
-import ModalRemoveMessage from '../components/ModalRemoveMessage'
-import Skel from '../components/Skel'
 import appConfig from '../config.json'
+import { ButtonSendSticker } from '../src/components/ButtonSendSticker'
+import ModalRemoveMessage from '../src/components/ModalRemoveMessage'
+import Skel from '../src/components/Skel'
 
 type messageType = {
 	id?: number
@@ -17,13 +19,36 @@ const SUPABASE_ANON_KEY =
 const SUPABASE_ANON_URL = 'https://bwolqsfbgqytdjdgdufi.supabase.co'
 const supabaseClient = createClient(SUPABASE_ANON_URL, SUPABASE_ANON_KEY)
 
+const listenRealTimeMessages = (addMessage, removeMessage) => {
+	return supabaseClient
+		.from('messages')
+		.on('INSERT', (res) => {
+			addMessage(res.new)
+		})
+		.on('DELETE', (res) => {
+			removeMessage(res.old)
+		})
+		.subscribe()
+}
+
+const listenRealTimeMessagesAll = (addMessage) => {
+	return supabaseClient
+		.from('messages')
+		.on('DELETE', (res) => {
+			addMessage(res.old)
+		})
+		.subscribe()
+}
+
 export default function ChatPage() {
+	const router = useRouter()
+	const user = router.query.username
 	const [message, setMessage] = useState('')
 	const [messageList, setMessageList] = useState<messageType[]>()
 	const [loading, setLoading] = useState(false)
 
 	useEffect(() => {
-		supabaseClient
+		const allMessages = supabaseClient
 			.from('messages')
 			.select('*')
 			.order('created_at', { ascending: false })
@@ -31,12 +56,27 @@ export default function ChatPage() {
 				setMessageList(data)
 				setLoading(false)
 			})
+		listenRealTimeMessages(
+			(newMessage) => {
+				setMessageList((messageList) => {
+					return [newMessage, ...messageList]
+				})
+			},
+			(messageIdToRemove) => {
+				setMessageList((messageList) => {
+					const newMessageList = messageList.filter(
+						(message) => message.id != messageIdToRemove.id
+					)
+					return newMessageList
+				})
+			}
+		)
 	}, [])
 
 	const handleNewMessage = (newMessage: string) => {
 		setLoading(true)
 		const message = {
-			de: 'zlincon',
+			de: user,
 			texto: newMessage,
 		}
 
@@ -44,7 +84,6 @@ export default function ChatPage() {
 			.from('messages')
 			.insert([message])
 			.then(({ data }) => {
-				setMessageList([data[0], ...messageList])
 				setLoading(false)
 			})
 		setMessage('')
@@ -111,6 +150,7 @@ export default function ChatPage() {
 					}}
 				>
 					<MessageList
+						user={user}
 						messages={messageList}
 						removeMessage={removeMessage}
 						loading={loading}
@@ -148,12 +188,8 @@ export default function ChatPage() {
 								} as any
 							}
 						/>
-						<Button
+						{/* <Button
 							type='submit'
-							onClick={(event) => {
-								event.preventDefault()
-								handleNewMessage(message)
-							}}
 							label='>'
 							disabled={!message.length}
 							fullWidth
@@ -165,6 +201,40 @@ export default function ChatPage() {
 							}}
 							styleSheet={{
 								width: '3%',
+							}}
+						/> */}
+						<ButtonSendSticker
+							onStickerClick={(sticker) => {
+								handleNewMessage(':sticker:' + sticker)
+							}}
+						/>
+						<Button
+							type='submit'
+							disabled={!message.length}
+							styleSheet={
+								{
+									borderRadius: '50%',
+									padding: '0 3px 0 0',
+									minWidth: '50px',
+									minHeight: '50px',
+									fontSize: '20px',
+									marginBottom: '8px',
+									lineHeight: '0',
+									display: 'flex',
+									marginLeft: '1rem',
+									alignItems: 'center',
+									justifyContent: 'center',
+									backgroundColor: appConfig.theme.colors.neutrals[300],
+									hover: {
+										filter: 'grayscale(0)',
+									},
+								} as any
+							}
+							label='>'
+							// @ts-ignore: Unreachable code error
+							onClick={(event) => {
+								event.preventDefault()
+								handleNewMessage(message)
 							}}
 						/>
 					</Box>
@@ -202,12 +272,16 @@ type MessageListProps = {
 	messages: messageType[]
 	removeMessage: (id: number) => void
 	loading: boolean
+	user: string | string[]
 }
 
-function MessageList({ messages, removeMessage, loading }: MessageListProps) {
-	useEffect(() => {
-		console.log(loading)
-	}, [loading])
+function MessageList({
+	messages,
+	removeMessage,
+	loading,
+	user,
+}: MessageListProps) {
+	useEffect(() => {}, [loading])
 
 	return (
 		<Box
@@ -282,13 +356,25 @@ function MessageList({ messages, removeMessage, loading }: MessageListProps) {
 									marginLeft: 'auto',
 								}}
 							>
-								<ModalRemoveMessage
-									messageId={message.id}
-									removeMessage={removeMessage}
-								/>
+								{message.de == user && (
+									<ModalRemoveMessage
+										messageId={message.id}
+										removeMessage={removeMessage}
+									/>
+								)}
 							</Box>
 						</Box>
-						{message?.texto}
+						{message?.texto.startsWith(':sticker:') ? (
+							<Image
+								styleSheet={{
+									maxWidth: '10rem',
+								}}
+								src={message.texto.replace(':sticker:', '')}
+							/>
+						) : (
+							message.texto
+						)}
+						{/* {message?.texto} */}
 					</Text>
 				)
 			})}

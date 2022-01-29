@@ -1,7 +1,7 @@
 import { Button, Text } from '@skynexui/components'
 import React from 'react'
 import Modal from 'react-modal'
-import appConfig from '../config.json'
+import appConfig from '../../config.json'
 
 const customStyles = {
 	content: {
@@ -56,6 +56,7 @@ export default function ModalRemoveMessage({
 				}}
 			/>
 			<Modal
+				ariaHideApp={false}
 				isOpen={modalIsOpen}
 				onRequestClose={closeModal}
 				style={customStyles}

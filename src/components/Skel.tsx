@@ -2,7 +2,7 @@ import { Box, Text } from '@skynexui/components'
 import React from 'react'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import appConfig from '../config.json'
+import appConfig from '../../config.json'
 
 export default function Skel() {
 	return (
