@@ -34,8 +34,8 @@ function Titulo(props) {
 
 export default function PaginaInicial() {
 	const [username, setUsername] = useState('')
-	const [followers, setFollowers] = useState('')
-	const [following, setFollowing] = useState('')
+	const [followers, setFollowers] = useState(undefined)
+	const [following, setFollowing] = useState(undefined)
 	const [githubApi, setGithubApi] = useState<GithubApi>({
 		name: null,
 		followers_url: null,
@@ -47,6 +47,7 @@ export default function PaginaInicial() {
 		fetch(`https://api.github.com/users/${username}`)
 			.then(async (res) => await res.json())
 			.then((res) => {
+				console.log(username)
 				setGithubApi(res)
 			})
 			.then(() => {
@@ -54,12 +55,14 @@ export default function PaginaInicial() {
 					fetch(`${githubApi.followers_url}`)
 						.then(async (res) => await res.json())
 						.then((res) => {
+							console.log(githubApi.followers_url)
 							setFollowers(res.length)
 						})
 				githubApi.following_url &&
 					fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
 						.then(async (res) => await res.json())
 						.then((res) => {
+							console.log(githubApi.following_url)
 							setFollowing(res.length)
 						})
 			})
@@ -228,6 +231,10 @@ export default function PaginaInicial() {
 								>
 									{githubApi.name}
 								</Text>
+							</>
+						)}
+						{followers && following && (
+							<>
 								<Icon name='FaUserFriends' styleSheet={{ color: 'white' }} />
 								<Text
 									variant='body4'
@@ -235,12 +242,27 @@ export default function PaginaInicial() {
 										color: appConfig.theme.colors.neutrals[200],
 									}}
 								>
-									{following}
+									{followers}
 									{following == '30' && '+'} followings | {followers}
 									{followers == '30' && '+'} followers
 								</Text>
 							</>
 						)}
+						{/* {following && (
+							<>
+								<Icon name='FaUserFriends' styleSheet={{ color: 'white' }} />
+								<Text
+									variant='body4'
+									styleSheet={{
+										color: appConfig.theme.colors.neutrals[200],
+									}}
+								>
+									{followers}
+									{following == '30' && '+'} followings | {followers}
+									{followers == '30' && '+'} followers
+								</Text>
+							</>
+						)} */}
 					</Box>
 				</Box>
 			</Box>

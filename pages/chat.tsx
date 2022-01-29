@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import 'react-loading-skeleton/dist/skeleton.css'
 import appConfig from '../config.json'
 import { ButtonSendSticker } from '../src/components/ButtonSendSticker'
-import ModalRemoveMessage from '../src/components/ModalRemoveMessage'
+import Message from '../src/components/Message'
 import Skel from '../src/components/Skel'
 
 type messageType = {
@@ -136,7 +136,7 @@ export default function ChatPage() {
 					} as any
 				}
 			>
-				<Header />
+				<Header user={user} />
 				<Box
 					styleSheet={{
 						position: 'relative',
@@ -149,6 +149,13 @@ export default function ChatPage() {
 						padding: '16px',
 					}}
 				>
+					{/* <Popover
+						style={{ backgroundColor: popover.color, color: 'white' }}
+						isOpen={popover.isOpen && popover.id === 1}
+						body={<div>This is tehe vody</div>}
+					>
+						<button onClick={(e) => togglePopover(e, 1, 'red')}>asd</button>
+					</Popover> */}
 					<MessageList
 						user={user}
 						messages={messageList}
@@ -208,6 +215,7 @@ export default function ChatPage() {
 								handleNewMessage(':sticker:' + sticker)
 							}}
 						/>
+
 						<Button
 							type='submit'
 							disabled={!message.length}
@@ -244,7 +252,7 @@ export default function ChatPage() {
 	)
 }
 
-function Header() {
+function Header({ user }) {
 	return (
 		<>
 			<Box
@@ -257,9 +265,20 @@ function Header() {
 				}}
 			>
 				<Text variant='heading5'>Chat</Text>
+				<Box>
+					<Image
+						styleSheet={{
+							width: '3rem',
+							height: '3rem',
+							boxShadow: ' 0px 0px 5px black',
+							borderRadius: '50%',
+						}}
+						src={`https://github.com/${user}.png`}
+					/>
+				</Box>
 				<Button
-					variant='tertiary'
-					colorVariant='dark'
+					variant='secondary'
+					colorVariant='light'
 					label='Logout'
 					href='/'
 				/>
@@ -307,75 +326,11 @@ function MessageList({
 			{loading && <Skel />}
 			{messages?.map((message) => {
 				return (
-					<Text
-						key={message?.id}
-						tag='li'
-						styleSheet={{
-							borderRadius: '5px',
-							padding: '6px',
-							marginBottom: '12px',
-							hover: {
-								backgroundColor: appConfig.theme.colors.neutrals[700],
-							},
-						}}
-					>
-						<Box
-							styleSheet={{
-								marginBottom: '8px',
-								display: 'flex',
-								alignItems: 'center',
-							}}
-						>
-							<Image
-								styleSheet={{
-									width: '20px',
-									height: '20px',
-									borderRadius: '50%',
-									display: 'inline-block',
-									marginRight: '8px',
-								}}
-								src={`https://github.com/${message.de}.png`}
-							/>
-
-							<Text tag='strong'>{message.de}</Text>
-							<Text
-								styleSheet={{
-									fontSize: '10px',
-									marginLeft: '8px',
-									color: appConfig.theme.colors.neutrals[300],
-								}}
-								tag='span'
-							>
-								{new Date().toLocaleDateString()}
-							</Text>
-							<Box
-								styleSheet={{
-									width: '30px',
-									height: '30px',
-									borderRadius: '5px',
-									marginLeft: 'auto',
-								}}
-							>
-								{message.de == user && (
-									<ModalRemoveMessage
-										messageId={message.id}
-										removeMessage={removeMessage}
-									/>
-								)}
-							</Box>
-						</Box>
-						{message?.texto.startsWith(':sticker:') ? (
-							<Image
-								styleSheet={{
-									maxWidth: '10rem',
-								}}
-								src={message.texto.replace(':sticker:', '')}
-							/>
-						) : (
-							message.texto
-						)}
-						{/* {message?.texto} */}
-					</Text>
+					<Message
+						removeMessage={removeMessage}
+						user={user}
+						message={message}
+					/>
 				)
 			})}
 		</Box>
