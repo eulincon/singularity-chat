@@ -19,19 +19,6 @@ function Titulo(props) {
 	)
 }
 
-// Componente React
-// function HomePage() {
-//     // JSX
-//     return (
-//         <div>
-//             <GlobalStyle />
-//             <Titulo tag="h2">Boas vindas de volta!</Titulo>
-//             <h2>Discord - Alura Matrix</h2>
-//         </div>
-//     )
-// }
-// export default HomePage
-
 export default function PaginaInicial() {
 	const [username, setUsername] = useState('')
 	const [followers, setFollowers] = useState(undefined)
@@ -51,22 +38,47 @@ export default function PaginaInicial() {
 				setGithubApi(res)
 			})
 			.then(() => {
-				githubApi.followers_url &&
-					fetch(`${githubApi.followers_url}`)
-						.then(async (res) => await res.json())
-						.then((res) => {
-							console.log(githubApi.followers_url)
-							setFollowers(res.length)
-						})
-				githubApi.following_url &&
-					fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
-						.then(async (res) => await res.json())
-						.then((res) => {
-							console.log(githubApi.following_url)
-							setFollowing(res.length)
-						})
+				clearTimeout(timeout)
+				var timeout = setTimeout(() => {
+					console.log('Catch here')
+					githubApi.followers_url &&
+						fetch(`${githubApi.followers_url}`)
+							.then(async (res) => await res.json())
+							.then((res) => {
+								console.log(githubApi.followers_url)
+								setFollowers(res.length)
+							})
+					githubApi.following_url &&
+						fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
+							.then(async (res) => await res.json())
+							.then((res) => {
+								console.log(githubApi.following_url)
+								setFollowing(res.length)
+							})
+				}, 10000)
 			})
 	}, [username])
+
+	// const getGithubInfo = () => {
+	// 	setTimeout(() => {
+	// 		//your code to be executed after 1 second
+	// 		console.log('Catch here')
+	// 		githubApi.followers_url &&
+	// 			fetch(`${githubApi.followers_url}`)
+	// 				.then(async (res) => await res.json())
+	// 				.then((res) => {
+	// 					console.log(githubApi.followers_url)
+	// 					setFollowers(res.length)
+	// 				})
+	// 		githubApi.following_url &&
+	// 			fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
+	// 				.then(async (res) => await res.json())
+	// 				.then((res) => {
+	// 					console.log(githubApi.following_url)
+	// 					setFollowing(res.length)
+	// 				})
+	// 	}, timeout)
+	// }
 
 	return (
 		<>
@@ -76,7 +88,7 @@ export default function PaginaInicial() {
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
-						backgroundColor: appConfig.theme.colors.neutrals[800],
+						// backgroundColor: appConfig.theme.colors.neutrals[800],
 						backgroundImage:
 							'url(https://virtualbackgrounds.site/wp-content/uploads/2020/07/earthrise-1536x864.jpg)',
 						backgroundRepeat: 'no-repeat',
@@ -131,13 +143,14 @@ export default function PaginaInicial() {
 								color: appConfig.theme.colors.neutrals[300],
 							}}
 						>
-							{appConfig.name}
+							Singularity
 						</Text>
 
 						<TextField
 							fullWidth
 							value={username}
-							onChange={(event) => {
+							// @ts-ignore: Unreachable code error
+							onKeyUp={(event) => {
 								setUsername(event.target.value)
 							}}
 							textFieldColors={
@@ -248,7 +261,7 @@ export default function PaginaInicial() {
 								</Text>
 							</>
 						)}
-						{/* {following && (
+						{following && (
 							<>
 								<Icon name='FaUserFriends' styleSheet={{ color: 'white' }} />
 								<Text
@@ -262,7 +275,7 @@ export default function PaginaInicial() {
 									{followers == '30' && '+'} followers
 								</Text>
 							</>
-						)} */}
+						)}
 					</Box>
 				</Box>
 			</Box>
