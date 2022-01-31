@@ -1,6 +1,6 @@
-import { Box, Button, Icon, Image, Text, TextField } from '@skynexui/components'
+import { Box, Button, Image, Text, TextField } from '@skynexui/components'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import appConfig from '../config.json'
 
 function Titulo(props) {
@@ -21,43 +21,10 @@ function Titulo(props) {
 
 export default function PaginaInicial() {
 	const [username, setUsername] = useState('')
-	const [followers, setFollowers] = useState(undefined)
-	const [following, setFollowing] = useState(undefined)
-	const [githubApi, setGithubApi] = useState<GithubApi>({
-		name: null,
-		followers_url: null,
-		following_url: null,
-	})
 	const router = useRouter()
 
-	useEffect(() => {
-		fetch(`https://api.github.com/users/${username}`)
-			.then(async (res) => await res.json())
-			.then((res) => {
-				console.log(username)
-				setGithubApi(res)
-			})
-			.then(() => {
-				clearTimeout(timeout)
-				var timeout = setTimeout(() => {
-					console.log('Catch here')
-					githubApi.followers_url &&
-						fetch(`${githubApi.followers_url}`)
-							.then(async (res) => await res.json())
-							.then((res) => {
-								console.log(githubApi.followers_url)
-								setFollowers(res.length)
-							})
-					githubApi.following_url &&
-						fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
-							.then(async (res) => await res.json())
-							.then((res) => {
-								console.log(githubApi.following_url)
-								setFollowing(res.length)
-							})
-				}, 10000)
-			})
-	}, [username])
+	// useEffect(() => {
+	// }, [username])
 
 	// const getGithubInfo = () => {
 	// 	setTimeout(() => {
@@ -111,8 +78,10 @@ export default function PaginaInicial() {
 						borderRadius: '5px',
 						padding: '32px',
 						margin: '16px',
-						boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
+						boxShadow: '0 2px 10px 0 rgb(0 0 0 / 100%)',
 						backgroundColor: appConfig.theme.colors.neutrals[700],
+						opacity: '0.8',
+						// backgroundColor: 'rgba(255, 255, 255, 0.5)',
 						border: '1px solid',
 						borderColor: appConfig.theme.colors.neutrals[999],
 					}}
@@ -217,7 +186,7 @@ export default function PaginaInicial() {
 							{username}
 						</Text> */}
 
-						{githubApi.name && (
+						{username && (
 							<>
 								<Box
 									styleSheet={
@@ -242,11 +211,11 @@ export default function PaginaInicial() {
 										marginBottom: '0.5rem',
 									}}
 								>
-									{githubApi.name}
+									{username}
 								</Text>
 							</>
 						)}
-						{followers && following && (
+						{/* {following && (
 							<>
 								<Icon name='FaUserFriends' styleSheet={{ color: 'white' }} />
 								<Text
@@ -260,31 +229,10 @@ export default function PaginaInicial() {
 									{followers == '30' && '+'} followers
 								</Text>
 							</>
-						)}
-						{following && (
-							<>
-								<Icon name='FaUserFriends' styleSheet={{ color: 'white' }} />
-								<Text
-									variant='body4'
-									styleSheet={{
-										color: appConfig.theme.colors.neutrals[200],
-									}}
-								>
-									{followers}
-									{following == '30' && '+'} followings | {followers}
-									{followers == '30' && '+'} followers
-								</Text>
-							</>
-						)}
+						)} */}
 					</Box>
 				</Box>
 			</Box>
 		</>
 	)
-}
-
-type GithubApi = {
-	name: string
-	followers_url: string
-	following_url: string
 }

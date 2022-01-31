@@ -1,4 +1,4 @@
-import { Box, Button, Image, Text, TextField } from '@skynexui/components'
+import { Box, Button, Icon, Image, Text, TextField } from '@skynexui/components'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
@@ -42,7 +42,7 @@ const listenRealTimeMessagesAll = (addMessage) => {
 
 export default function ChatPage() {
 	const router = useRouter()
-	const user = router.query.username
+	const username = router.query.username
 	const [message, setMessage] = useState('')
 	const [messageList, setMessageList] = useState<messageType[]>()
 	const [loading, setLoading] = useState(false)
@@ -76,7 +76,7 @@ export default function ChatPage() {
 	const handleNewMessage = (newMessage: string) => {
 		setLoading(true)
 		const message = {
-			de: user,
+			de: username,
 			texto: newMessage,
 		}
 
@@ -136,7 +136,7 @@ export default function ChatPage() {
 					} as any
 				}
 			>
-				<Header user={user} />
+				<Header username={username} />
 				<Box
 					styleSheet={{
 						position: 'relative',
@@ -157,7 +157,7 @@ export default function ChatPage() {
 						<button onClick={(e) => togglePopover(e, 1, 'red')}>asd</button>
 					</Popover> */}
 					<MessageList
-						user={user}
+						user={username}
 						messages={messageList}
 						removeMessage={removeMessage}
 						loading={loading}
@@ -252,7 +252,47 @@ export default function ChatPage() {
 	)
 }
 
-function Header({ user }) {
+type GithubApi = {
+	name: string
+	followers_url: string
+	following_url: string
+}
+
+function Header({ username }) {
+	const [name, setName] = useState(username)
+	const [followers, setFollowers] = useState(undefined)
+	const [following, setFollowing] = useState(undefined)
+	const [githubApi, setGithubApi] = useState<GithubApi>({
+		name: null,
+		followers_url: null,
+		following_url: null,
+	})
+
+	useEffect(() => {
+		console.log(username)
+		fetch(`https://api.github.com/users/${name}`)
+			.then(async (res) => await res.json())
+			.then((res) => {
+				setGithubApi(res)
+			})
+			.then(() => {
+				githubApi.followers_url &&
+					fetch(`${githubApi.followers_url}`)
+						.then(async (res) => await res.json())
+						.then((res) => {
+							console.log(res)
+							setFollowers(res.length)
+						})
+				githubApi.following_url &&
+					fetch(`${githubApi.following_url.replace('{/other_user}', '')}`)
+						.then(async (res) => await res.json())
+						.then((res) => {
+							console.log(res)
+							setFollowing(res.length)
+						})
+			})
+	}, [username])
+
 	return (
 		<>
 			<Box
@@ -265,7 +305,13 @@ function Header({ user }) {
 				}}
 			>
 				<Text variant='heading5'>Chat</Text>
-				<Box>
+				<Box
+					styleSheet={{
+						display: 'flex',
+						flexDirection: 'column',
+						alignItems: 'center',
+					}}
+				>
 					<Image
 						styleSheet={{
 							width: '3rem',
@@ -273,8 +319,24 @@ function Header({ user }) {
 							boxShadow: ' 0px 0px 5px black',
 							borderRadius: '50%',
 						}}
-						src={`https://github.com/${user}.png`}
+						src={`https://github.com/${username}.png`}
 					/>
+					{console.log(followers, following)}
+					{followers && following && (
+						<>
+							<Icon name='FaUserFriends' styleSheet={{ color: 'white' }} />
+							<Text
+								variant='body4'
+								styleSheet={{
+									color: appConfig.theme.colors.neutrals[200],
+								}}
+							>
+								{following}
+								{following == '30' && '+'} followings | {followers}
+								{followers == '30' && '+'} followers
+							</Text>
+						</>
+					)}
 				</Box>
 				<Button
 					variant='secondary'
@@ -306,7 +368,8 @@ function MessageList({
 		<Box
 			tag='ul'
 			styleSheet={{
-				overflow: 'scroll',
+				// @ts-ignore: Unreachable code error
+				overflowX: 'hidden',
 				display: 'flex',
 				flexDirection: 'column-reverse',
 				flex: 1,
@@ -327,6 +390,7 @@ function MessageList({
 			{messages?.map((message) => {
 				return (
 					<Message
+						key={message.id}
 						removeMessage={removeMessage}
 						user={user}
 						message={message}
