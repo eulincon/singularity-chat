@@ -1,3 +1,5 @@
+import Head from 'next/head'
+
 function GlobalStyle() {
 	return (
 		<style global jsx>{`
@@ -32,6 +34,13 @@ function GlobalStyle() {
 export default function CystomApp({ Component, pageProps }) {
 	return (
 		<>
+			<Head>
+				<title>Singularity</title>
+				<link
+					rel='icon'
+					href='https://img.icons8.com/color/48/000000/chat--v1.png'
+				></link>
+			</Head>
 			<GlobalStyle />
 			<Component {...pageProps} />
 		</>
